@@ -1,0 +1,6 @@
+name: metronome_dart
+version: 1.0.0
+dependencies:
+  browser: any
+transformers:
+  - $dart2js
