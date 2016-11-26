@@ -29,6 +29,24 @@ double nextNoteTime = 0.0;
 // The worker used to fire timer messages
 MetronomeWorker timerWorker;
 
+scheduler() {
+  // while there are notes that will need to play before the next interval,
+  // schedule them and advance the pointer.
+  while (nextNoteTime < audioContext.currentTime + _SCHEDULE_AHEAD_TIME) {
+    var newNote = new Note()
+      ..note = current16th
+      ..time = nextNoteTime;
+    scheduleNote(newNote);
+    // Notice this picks up the CURRENT tempo value to calculate beat length.
+    var secondsPer16th = 60.0 / _TEMPO / 4;
+    nextNoteTime += secondsPer16th;
+    current16th++;
+    if (current16th == 16) {
+      current16th = 0;
+    }
+  }
+}
+
 scheduleNote(Note note) {
   if ((_NOTE_RESOLUTION == 1) && (note.note % 2 != 0))
     return; // we're not playing non-8th 16th notes
@@ -49,24 +67,6 @@ scheduleNote(Note note) {
   osc.stop(note.time + _NOTE_LENGTH);
 }
 
-scheduler() {
-  // while there are notes that will need to play before the next interval,
-  // schedule them and advance the pointer.
-  while (nextNoteTime < audioContext.currentTime + _SCHEDULE_AHEAD_TIME) {
-    var newNote = new Note()
-      ..note = current16th
-      ..time = nextNoteTime;
-    scheduleNote(newNote);
-    // Notice this picks up the CURRENT tempo value to calculate beat length.
-    var secondsPer16th = 60.0 / _TEMPO / 4;
-    nextNoteTime += secondsPer16th;
-    current16th++;
-    if (current16th == 16) {
-      current16th = 0;
-    }
-  }
-}
-
 play() {
   isPlaying = !isPlaying;
 
@@ -82,19 +82,15 @@ play() {
   }
 }
 
-init() {
-  audioContext = new AudioContext();
-  timerWorker = new MetronomeWorker();
-
-  timerWorker.onTick.listen((_) => scheduler());
-  timerWorker.changeInterval(_LOOKAHEAD);
-}
-
 main() {
   var playButton = querySelector("#playButton");
   playButton.onClick.listen((e) {
     playButton.innerHtml = play();
   });
 
-  init();
+  audioContext = new AudioContext();
+  timerWorker = new MetronomeWorker();
+
+  timerWorker.onTick.listen((_) => scheduler());
+  timerWorker.changeInterval(_LOOKAHEAD);
 }
