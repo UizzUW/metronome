@@ -8,7 +8,7 @@ class Note {
 }
 
 // tempo (in bpm)
-const _TEMPO = 120;
+const _TEMPO = 170;
 // How frequently to call scheduling function (in ms)
 const _LOOKAHEAD = 25;
 // How far ahead to schedule audio (sec)
