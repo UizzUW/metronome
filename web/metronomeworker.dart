@@ -21,7 +21,7 @@ class MetronomeWorker {
 
   void changeInterval(int newInterval) {
     _interval = newInterval;
-    if (_timer.isActive) {
+    if (_timer?.isActive ?? false) {
       stop();
       start();
     }
